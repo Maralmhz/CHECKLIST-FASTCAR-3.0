@@ -7,6 +7,6 @@ window.OFICINA_CONFIG = {
     logo: "logo.png",
     corPrimaria: "#e41616",
     endereco: "Av. Régulus, 248 - Jardim Riacho das Pedras, Contagem - MG, 32241-210",
-    telefone: "(31) 99457-9274 | (31) 99457-9274",
-    whatsapp: "(31) 99457-9274 | (31) 99457-9274"
+    telefone: "(31) 99457-9274 | (31) 2342-1699",
+    whatsapp: "(31) 99457-9274 | (31) 2342-1699"
 };

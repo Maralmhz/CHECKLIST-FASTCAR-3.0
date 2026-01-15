@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="Checklist de Oficina Fast Car - App Offline com PDF">
+    <meta name="description" content="Checklist de Oficina - App Offline com PDF">
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo.png">
@@ -19,14 +19,15 @@
         <img id="logo-oficina" src="logo.png" alt="Logo da Oficina">
     </div>
     <div class="header-content">
-        <h1 id="nome-oficina">Fast Car Centro Automotivo</h1>
+        <!-- ✅ NEUTRO - PREENCHER NO CONFIG.JS -->
+        <h1 id="nome-oficina">OFICINA</h1>
         <p id="subtitulo-oficina">Checklist de entrada e inspeção veicular</p>
         <div class="contato-info">
             <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
-            <span id="telefone-oficina">(31) 99457-9274 | (31) 99457-9274 </span>
+            <span id="telefone-oficina">(00) 00000-0000</span>
         </div>
         <div class="endereco-oficina" id="endereco-oficina">
-            Av. Régulus, 248 - Jardim Riacho das Pedras, Contagem - MG, 32241-210 · Tel: (31) 2342-1699
+            ENDEREÇO DA OFICINA
         </div>
 
                 <div class="status-sync">
@@ -291,6 +292,11 @@
 
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="exportarDados()">💾 Exportar Todos (JSON)</button>
+
+            <input type="file" id="inputImportarJSON" style="display: none;" onchange="importarBackup(this)" accept=".json">
+            <button onclick="document.getElementById('inputImportarJSON').click()" style="background-color: #f39c12; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; margin-left: 5px;">
+                📂 Importar JSON
+            </button>
                     <button class="btn-danger" onclick="limparTodosDados()">🗑️ Limpar Histórico</button>
                 </div>
             </div>
@@ -498,9 +504,9 @@ function salvarChecklist() {
                 ...formData
             };
 
-            let checklists = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            let checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
             checklists.push(checklist);
-            localStorage.setItem('checklists_fastcar', JSON.stringify(checklists));
+            localStorage.setItem('checklists', JSON.stringify(checklists));
 
             alert("✅ Checklist salvo com sucesso no Histórico!");
             document.getElementById('checklistForm').reset();
@@ -511,7 +517,7 @@ function salvarChecklist() {
         function carregarHistorico() {
             const listaDiv = document.getElementById('checklistsList');
             const emptyMsg = document.getElementById('emptyMessage');
-            const checklists = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
 
             listaDiv.innerHTML = '';
 
@@ -543,7 +549,7 @@ function salvarChecklist() {
         }
 
         function carregarChecklist(id) {
-            const checklists = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
             const item = checklists.find(c => c.id === id);
 
             if (item) {
@@ -574,16 +580,16 @@ function salvarChecklist() {
 
         function excluirChecklist(id) {
             if (confirm("Tem certeza que deseja excluir este checklist?")) {
-                let checklists = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+                let checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
                 checklists = checklists.filter(c => c.id !== id);
-                localStorage.setItem('checklists_fastcar', JSON.stringify(checklists));
+                localStorage.setItem('checklists', JSON.stringify(checklists));
                 carregarHistorico();
             }
         }
 
         function filtrarChecklists() {
             const termo = document.getElementById('searchInput').value.toLowerCase();
-            const checklists = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
             const listaDiv = document.getElementById('checklistsList');
             const emptyMsg = document.getElementById('emptyMessage');
 
@@ -622,7 +628,7 @@ function salvarChecklist() {
         }
 
         function ordenarChecklists() {
-            const checklists = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
             checklists.sort((a, b) => {
                 const placaA = (a.placa || '').toUpperCase();
                 const placaB = (b.placa || '').toUpperCase();
@@ -630,7 +636,7 @@ function salvarChecklist() {
                 if (placaA > placaB) return 1;
                 return 0;
             });
-            localStorage.setItem('checklists_fastcar', JSON.stringify(checklists));
+            localStorage.setItem('checklists', JSON.stringify(checklists));
             carregarHistorico();
         }
 
@@ -653,7 +659,7 @@ function salvarChecklist() {
 
             const opt = {
                 margin:       [0, 0, 0, 0],
-                filename:     'Checklist-FastCar-' + document.getElementById('placa').value + '.pdf',
+                filename:     'Checklist-' + document.getElementById('placa').value + '.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  {
                     scale: 2,
@@ -694,7 +700,7 @@ function salvarChecklist() {
         }
 
         function exportarDados() {
-            const db = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            const db = JSON.parse(localStorage.getItem('checklists') || '[]');
             if (!db.length) {
                 alert("Não há dados para exportar.");
                 return;
@@ -703,21 +709,21 @@ function salvarChecklist() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'checklists_fastcar.json';
+            a.download = 'checklists.json';
             a.click();
             URL.revokeObjectURL(url);
         }
 
         function limparTodosDados() {
             if (confirm("Deseja apagar TODO o histórico?")) {
-                localStorage.removeItem('checklists_fastcar');
+                localStorage.removeItem('checklists');
                 carregarHistorico();
                 alert("Histórico limpo.");
             }
         }
 
         function atualizarRelatorios() {
-            const db = JSON.parse(localStorage.getItem('checklists_fastcar') || '[]');
+            const db = JSON.parse(localStorage.getItem('checklists') || '[]');
 
             document.getElementById('totalChecklists').textContent = db.length;
 
@@ -1068,7 +1074,7 @@ function gerarPDFFotos() {
                     font-size: 11px;
                     line-height: 1.5;
                 ">
-                    <div style="font-weight: bold; color: #e41616; font-size: 12px; margin-bottom: 5px;">FAST CAR - INSPEÇÃO DE FOTOS</div>
+                    <div style="font-weight: bold; color: #e41616; font-size: 12px; margin-bottom: 5px;">- INSPEÇÃO DE FOTOS</div>
                     <div><strong>Placa:</strong> ${placa}</div>
                     <div><strong>Modelo:</strong> ${modelo}</div>
                     <div><strong>Chassi:</strong> ${chassi}</div>

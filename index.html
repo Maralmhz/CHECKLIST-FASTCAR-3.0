@@ -660,8 +660,7 @@ function salvarChecklist() {
                     scale: 2,
                     useCORS: true,
                     scrollY: 0,
-                    windowWidth: 1200,                // ✅ COLOCAR ISSO
-    windowHeight: elemento.scrollHeight + 50 // ✅ E ISSO (opcional, mas bom pra garantir o final)
+windowWidth: document.documentElement.offsetWidth
 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
@@ -1154,4 +1153,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 

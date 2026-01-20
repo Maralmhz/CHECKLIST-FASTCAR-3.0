@@ -682,15 +682,19 @@ button {
     body {
         padding: 0;
         background: #ffffff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
     .container {
         box-shadow: none;
         max-width: 100%;
+        margin: 0;
     }
     .tabs,
     .action-buttons,
-    .header-badge {
-        display: none;
+    .header-badge,
+    #btnSalvarChecklist {
+        display: none !important;
     }
     .header {
         padding: 15px;
@@ -700,10 +704,20 @@ button {
         border-top: 3px solid var(--color-primary);
         padding-top: 20px;
     }
+    
+    /* ESSAS LINHAS RESOLVEM O CORTE NO IPHONE */
+    tr, td, th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    table {
+        page-break-inside: auto;
+    }
 }
 
 .hidden {
     display: none !important;
 }
 </style>
+
 

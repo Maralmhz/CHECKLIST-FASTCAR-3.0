@@ -811,67 +811,92 @@ windowWidth: document.documentElement.offsetWidth
             document.getElementById('graficoMarcas').innerHTML = htmlGrafico;
         }
 
-        // ORÇAMENTO – PEÇAS & SERVIÇOS (planilha simples)
-        let itensOrcamento = [];
+// ORÇAMENTO - PEÇAS & SERVIÇOS - SEPARADOS
+let itensOrcamento = [];
 
-        function adicionarItemManual() {
-            const descricaoInput = document.getElementById('descricaoItem');
-            const valorInput = document.getElementById('valorItem');
+function adicionarItemManual() {
+    const descricaoInput = document.getElementById('descricaoItem');
+    const valorInput = document.getElementById('valorItem');
+    
+    // Captura qual tipo foi selecionado (radio button)
+    const tipo = document.querySelector('input[name="tipoItem"]:checked').value; 
 
-            const descricao = descricaoInput.value.trim();
-            const valor = parseFloat(valorInput.value || '0');
+    const descricao = descricaoInput.value.trim();
+    const valor = parseFloat(valorInput.value || '0');
 
-            if (!descricao) {
-                alert('Informe a peça/serviço.');
-                descricaoInput.focus();
-                return;
-            }
-            if (isNaN(valor) || valor < 0) {
-                alert('Informe um valor válido.');
-                valorInput.focus();
-                return;
-            }
+    if (!descricao) {
+        alert('Informe a descrição do item.');
+        descricaoInput.focus();
+        return;
+    }
+    if (isNaN(valor) || valor < 0) {
+        alert('Informe um valor válido.');
+        valorInput.focus();
+        return;
+    }
 
-            const item = {
-                id: Date.now(),
-                descricao,
-                valor
-            };
+    const item = {
+        id: Date.now(),
+        descricao,
+        valor,
+        tipo // salva 'peca' ou 'servico'
+    };
 
-            itensOrcamento.push(item);
-            renderizarTabela();
-            descricaoInput.value = '';
-            valorInput.value = '';
-            descricaoInput.focus();
+    itensOrcamento.push(item);
+    renderizarTabela();
+    
+    descricaoInput.value = '';
+    valorInput.value = '';
+    descricaoInput.focus();
+}
+
+function removerItem(id) {
+    itensOrcamento = itensOrcamento.filter(i => i.id !== id);
+    renderizarTabela();
+}
+
+function renderizarTabela() {
+    const tbodyPecas = document.getElementById('tabelaPecas');
+    const tbodyServicos = document.getElementById('tabelaServicos');
+    
+    const elTotalPecas = document.getElementById('totalPecas');
+    const elTotalServicos = document.getElementById('totalServicos');
+    const elTotalGeral = document.getElementById('totalGeralFinal');
+
+    // Limpa tabelas
+    if(tbodyPecas) tbodyPecas.innerHTML = '';
+    if(tbodyServicos) tbodyServicos.innerHTML = '';
+
+    let somaPecas = 0;
+    let somaServicos = 0;
+
+    itensOrcamento.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="border:1px solid #ddd; padding:6px;">${item.descricao}</td>
+          <td style="border:1px solid #ddd; padding:6px; text-align:right;">R$ ${item.valor.toFixed(2)}</td>
+          <td style="border:1px solid #ddd; padding:6px; text-align:center;">
+            <button class="btn-small btn-danger" onclick="removerItem(${item.id})">🗑️</button>
+          </td>
+        `;
+
+        if (item.tipo === 'servico') {
+            somaServicos += item.valor;
+            if(tbodyServicos) tbodyServicos.appendChild(tr);
+        } else {
+            // Default é peça
+            somaPecas += item.valor;
+            if(tbodyPecas) tbodyPecas.appendChild(tr);
         }
+    });
 
-        function removerItem(id) {
-            itensOrcamento = itensOrcamento.filter(i => i.id !== id);
-            renderizarTabela();
-        }
-
-        function renderizarTabela() {
-            const tbody = document.getElementById('tabelaItens');
-            const totalSpan = document.getElementById('totalGeral');
-            tbody.innerHTML = '';
-
-            let totalGeral = 0;
-            itensOrcamento.forEach(item => {
-                totalGeral += item.valor;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                  <td style="border:1px solid #ddd; padding:6px;">${item.descricao}</td>
-                  <td style="border:1px solid #ddd; padding:6px; text-align:right;">R$ ${item.valor.toFixed(2)}</td>
-                  <td style="border:1px solid #ddd; padding:6px; text-align:center;">
-                    <button class="btn-small btn-danger" onclick="removerItem(${item.id})">🗑️</button>
-                  </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            totalGeral = isNaN(totalGeral) ? 0 : totalGeral;
-            totalSpan.textContent = 'R$ ' + totalGeral.toFixed(2);
-        }
+    // Atualiza totais na tela
+    if(elTotalPecas) elTotalPecas.textContent = 'R$ ' + somaPecas.toFixed(2);
+    if(elTotalServicos) elTotalServicos.textContent = 'R$ ' + somaServicos.toFixed(2);
+    
+    const somaTotal = somaPecas + somaServicos;
+    if(elTotalGeral) elTotalGeral.textContent = 'R$ ' + somaTotal.toFixed(2);
+}
 
         // ENTER nos campos de Peças & Serviços adiciona linha
         document.addEventListener('DOMContentLoaded', () => {
@@ -1200,6 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 

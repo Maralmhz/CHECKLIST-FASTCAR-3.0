@@ -49,6 +49,30 @@
     <button class="tab-button" onclick="switchTab('historico')">📋 Histórico</button>
     <button class="tab-button" onclick="switchTab('relatorios')">📊 Relatórios</button>
 </div>
+        
+        <!-- BARRA FIXA DE INFORMAÇÕES DA OS -->
+<div class="os-info-bar" style="
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+">
+    <div style="font-size: 13px; font-weight: 600; color: #555;">
+        🛠️ ORDEM DE SERVIÇO ATUAL
+    </div>
+    <div id="barraFixaOS" style="
+        font-size: 18px; 
+        font-weight: 900; 
+        color: var(--color-primary); 
+        letter-spacing: 1px;
+    ">
+        -
+    </div>
+</div>
+
 
 
         <!-- ABA PRINCIPAL - CHECKLIST -->
@@ -1437,6 +1461,22 @@ function gerarNumeroOS() {
     // Retorna PLACA + DATA (Ex: OOX561229012026)
     return `${placa}${dia}${mes}${ano}`;
 }
+        // ATUALIZA A BARRA FIXA SEMPRE QUE MUDAR PLACA OU DATA
+document.addEventListener('input', function(e) {
+    if (e.target.id === 'placa' || e.target.id === 'data') {
+        atualizarBarraOS();
+    }
+});
+
+function atualizarBarraOS() {
+    const os = gerarNumeroOS(); // Usa sua função existente
+    const el = document.getElementById('barraFixaOS');
+    if (el) el.textContent = os;
+}
+
+// Chama uma vez ao carregar
+atualizarBarraOS();
+
 
 function atualizarResumoOS() {
     // === 1. CABEÇALHO E DADOS BÁSICOS ===
@@ -1664,6 +1704,7 @@ function prevStep(step) {
 
 </body>
 </html>
+
 
 
 

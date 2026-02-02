@@ -839,8 +839,8 @@ button {
 }
 
 .os-logo {
-    width: 85px;  /* ← maior */
-    height: 85px;
+    width: 95px;  /* ← maior */
+    height: 95px;
     object-fit: contain;
 }
 
@@ -1143,4 +1143,5 @@ button {
 }
 
 </style>
+
 

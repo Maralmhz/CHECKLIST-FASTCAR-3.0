@@ -839,8 +839,8 @@ button {
 }
 
 .os-logo {
-    width: 95px;  /* ← maior */
-    height: 95px;
+    width: 85px;  /* ← maior */
+    height: 85px;
     object-fit: contain;
 }
 
@@ -1039,10 +1039,6 @@ button {
         padding-bottom: 8px !important;
     }
     
-    .os-logo {
-        max-width: 50px !important;
-        max-height: 50px !important;
-    }
     
     .os-header-right {
         margin-top: -5px !important;

@@ -257,6 +257,15 @@
             </div>
         </div>
 
+        <div class="form-row full">
+    <div class="form-group">
+        <label for="obsInspecao">Observações da inspeção</label>
+        <textarea id="obsInspecao" name="obsInspecao"
+                  placeholder="Ex.: Vazamento de óleo no motor, ar condicionado não gela, lanterna traseira quebrada..."
+                  style="height: 60px; min-height: 60px;"></textarea>
+    </div>
+</div>
+
         <!-- BOTÕES DE NAVEGAÇÃO -->
         <div class="wizard-buttons">
             <button type="button" class="btn-secondary" onclick="prevStep(1)">⬅️ Voltar</button>
@@ -580,6 +589,12 @@
           <!-- O Javascript vai preencher aqui -->
         </div>
       </div>
+        
+<!-- OBSERVAÇÕES DA INSPEÇÃO -->
+<div class="os-box mt-10">
+    <div class="os-box-title">OBSERVAÇÕES DA INSPEÇÃO</div>
+    <div id="rObsInspecao" class="os-text-area">-</div>
+</div>
 
        <!-- ASSINATURAS -->
       <div class="os-assinaturas">
@@ -1596,6 +1611,13 @@ document.getElementById('rCelular').textContent = document.getElementById('celul
     // Serviços Solicitados
     document.getElementById('rServicos').textContent = document.getElementById('servicos')?.value || '-';
 
+    // Observações da Inspeção
+const obs = document.getElementById('obsInspecao')?.value || '-';
+if (document.getElementById('rObsInspecao')) {
+    document.getElementById('rObsInspecao').textContent = obs;
+}
+
+
     // === 2. INSPEÇÃO (CHECKBOXES) - LÓGICA REFORÇADA ===
     const areaBadges = document.getElementById('rChecklistBadges');
     areaBadges.innerHTML = ''; // Limpa tudo antes de começar
@@ -1826,5 +1848,3 @@ function prevStep(step) {
 
 </body>
 </html>
-
-

@@ -13,7 +13,7 @@ export async function buscarChecklistsNuvem() {
         const response = await fetch(url, {
             headers: {
                 'Authorization': `token ${config.TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json`
+                'Accept': 'application/vnd.github.v3+json'
             }
         });
 

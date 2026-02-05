@@ -16,7 +16,7 @@ window.OFICINA_CONFIG = {
 // ATENÇÃO: Seu token anterior foi revogado.
 // Crie um novo token e cole abaixo onde diz 'COLE_SEU_TOKEN_AQUI'
 window.CLOUD_CONFIG = {
-    TOKEN: 'COLE_SEU_TOKEN_AQUI', 
+    TOKEN: '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', 
     GIST_ID: '4d103ce60b15e3d0511a4fb4dc6e109f',
     FILENAME: 'backup_fastcar.json'
 };

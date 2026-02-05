@@ -13,8 +13,10 @@ window.OFICINA_CONFIG = {
 };
 
 // Configuração Nuvem (GitHub Gist)
+// ATENÇÃO: Seu token anterior foi revogado.
+// Crie um novo token e cole abaixo onde diz 'COLE_SEU_TOKEN_AQUI'
 window.CLOUD_CONFIG = {
-    TOKEN: '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',
+    TOKEN: 'COLE_SEU_TOKEN_AQUI', 
     GIST_ID: '4d103ce60b15e3d0511a4fb4dc6e109f',
     FILENAME: 'backup_fastcar.json'
 };

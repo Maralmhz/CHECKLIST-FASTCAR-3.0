@@ -4,7 +4,7 @@
 window.OFICINA_CONFIG = {
     nome: "FAST CAR CENTRO AUTOMOTIVO",
     subtitulo: "CHECKLIST DE ENTRADA E INSPEÇÃO VEICULAR",
-    cnpj: "03.713.506/0001-36",
+    cnpj: "60.516.882/0001-74",
     logo: "logo.png",
     corPrimaria: "#c32421",
     endereco: "Av. Régulus, 248 - Jardim Riacho das Pedras, Contagem - MG, 32241-210",

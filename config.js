@@ -2,6 +2,7 @@
 // Configuração completa para Checklist Veicular
 
 window.OFICINA_CONFIG = {
+    oficina_id: "fastcar",  // Identificador único da oficina
     nome: "FAST CAR CENTRO AUTOMOTIVO",
     subtitulo: "CHECKLIST DE ENTRADA E INSPEÇÃO VEICULAR",
     cnpj: "60.516.882/0001-74",
@@ -12,11 +13,25 @@ window.OFICINA_CONFIG = {
     whatsapp: "(31) 99457-9274"
 };
 
-// Configuração Nuvem (GitHub Gist)
-// ATENÇÃO: Seu token anterior foi revogado.
-// Crie um novo token e cole abaixo onde diz 'COLE_SEU_TOKEN_AQUI'
+// ============================================
+// CONFIGURAÇÃO FIREBASE (PRINCIPAL)
+// ============================================
+window.FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCpCfotfXYNpQu5o0fFbBvwOnQgU9PuYqU",
+    authDomain: "checklist-oficina-72c9e.firebaseapp.com",
+    databaseURL: "https://checklist-oficina-72c9e-default-rtdb.firebaseio.com",
+    projectId: "checklist-oficina-72c9e",
+    storageBucket: "checklist-oficina-72c9e.firebasestorage.app",
+    messagingSenderId: "305423384809",
+    appId: "1:305423384809:web:b152970a419848a0147078"
+};
+
+// ============================================
+// CONFIGURAÇÃO GIST (LEGADO - DESATIVADO)
+// ============================================
+// Token revogado - não usar mais
 window.CLOUD_CONFIG = {
-TOKEN: 'ghp_' + '1i9qb1ZgwD8p7F21N9FOqi5KYBTCQT47VmL5',
+    TOKEN: '',  // Token revogado por segurança
     GIST_ID: '75e76a26d9b0c36f602ec356f525680a',
     FILENAME: 'backup_fastcar.json'
 };

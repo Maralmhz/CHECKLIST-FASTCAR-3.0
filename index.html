@@ -213,7 +213,7 @@
         </div>
 
         <div class="equip-section">
-            <div class="equip-section-title">🛞 RODAS & PÁRA-BRISAS</div>
+            <div class="equip-section-title">🛟 RODAS & PÁRA-BRISAS</div>
             <div class="checkbox-group">
                 <div class="checkbox-item"><input type="checkbox" id="calotas" name="equipamentos" value="CALOTAS"><label for="calotas">CALOTAS</label></div>
                 <div class="checkbox-item"><input type="checkbox" id="rodas_liga" name="equipamentos" value="RODAS DE LIGA"><label for="rodas_liga">RODAS DE LIGA</label></div>
@@ -651,16 +651,13 @@
     <span id="rodape-texto">Developed by Hallz Branding 3199676-6963</span>
 </div>
 
-<!-- ===== ADICIONAR ANTES DO </body> ===== -->
+<!-- ===== SISTEMA DE CACHE E SYNC [FASTCAR 3.0] ===== -->
 
 <!-- Cache Manager -->
 <script src="cache_manager.js"></script>
 
 <!-- Sync Manager -->
-<script type="module">
-    import { syncManager } from './sync_manager.js';
-    window.syncManager = syncManager;
-</script>
+<script src="sync_manager.js"></script>
 
 </body>
 </html>

@@ -26,9 +26,12 @@
                 }
                 
                 // Verificar se firebase_app.js está carregado
-                if (typeof buscarChecklistsMesAtual !== 'function') {
-                    throw new Error('firebase_app.js não carregado. Verifique se está incluído no HTML.');
-                }
+               if (!window.db) {
+  console.log('⚠️ Firebase OFF - modo LOCAL apenas');
+  window.db = {
+    collection: () => ({
+      add: async()
+
                 
                 const ultimaSync = await cache.getUltimaSincronizacao();
                 

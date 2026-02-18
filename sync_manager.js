@@ -26,11 +26,11 @@
                 }
                 
                 // Verificar se firebase_app.js está carregado
-               if (!window.db) {
-  console.log('⚠️ Firebase OFF - modo LOCAL apenas');
-  window.db = {
-    collection: () => ({
-      add: async()
+              if (!window.db) {
+  console.warn('🔄 Firebase carregando... modo híbrido');
+  window.db = window.db || { collection: () => ({ add: async()=>{}, get: async()=>[] }) };
+}
+
 
                 
                 const ultimaSync = await cache.getUltimaSincronizacao();

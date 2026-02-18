@@ -1,0 +1,1 @@
+https://raw.githubusercontent.com/Maralmhz/dev/main/sync_manager.js

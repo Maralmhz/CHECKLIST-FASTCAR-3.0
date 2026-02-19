@@ -1,4 +1,4 @@
-// firebase_app.js - PADRÃO SaaS MULTI OFICINA
+// firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.0 - CORRIGIDO
 
 const getFirebaseConfig = () => {
     if (window.FIREBASE_CONFIG) return window.FIREBASE_CONFIG;
@@ -80,7 +80,7 @@ export async function salvarChecklist(checklist) {
     };
 
     await setDoc(doc(db, path, docId), dados, { merge: true });
-    console.log(`✅ Checklist salvo: oficinas/${getOficinaId()}/checklists/.../${docId}`);
+    console.log(`✅ Checklist salvo: oficinas/${getOficinaId()}/checklists/${path}/${docId}`);
 
     if (checklist.placa) {
         await atualizarIndiceVeiculo(checklist);
@@ -88,25 +88,31 @@ export async function salvarChecklist(checklist) {
 }
 
 async function atualizarIndiceVeiculo(checklist) {
-    const { db } = await initFirebase();
-    const { doc, setDoc, arrayUnion, serverTimestamp } = await import(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
-    );
+    try {
+        const { db } = await initFirebase();
+        const { doc, setDoc, arrayUnion, serverTimestamp } = await import(
+            "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+        );
 
-    const oficinaId = getOficinaId();
-    const placa = checklist.placa.replace(/[^A-Z0-9]/g, "").toUpperCase();
+        const oficinaId = getOficinaId();
+        const placa = checklist.placa.replace(/[^A-Z0-9]/g, "").toUpperCase();
 
-    await setDoc(
-        doc(db, `oficinas/${oficinaId}/veiculos`, placa),
-        {
-            placa,
-            ultima_visita: checklist.data_criacao,
-            historico_ids: arrayUnion(checklist.id),
-            updated_at: serverTimestamp()
-        },
-        { merge: true }
-    );
-    console.log(`🚗 Índice veículo atualizado: ${placa}`);
+        // ✅ CORRIGIDO: 4 segmentos (par)
+        await setDoc(
+            doc(db, `oficinas/${oficinaId}/veiculos/${placa}`),
+            {
+                placa,
+                ultima_visita: checklist.data_criacao,
+                historico_ids: arrayUnion(checklist.id),
+                updated_at: serverTimestamp()
+            },
+            { merge: true }
+        );
+        console.log(`🚗 Veículo indexado: oficinas/${oficinaId}/veiculos/${placa}`);
+    } catch (error) {
+        console.warn(`⚠️ Erro veículo ${checklist.placa}:`, error.message);
+        // Não quebra o checklist principal
+    }
 }
 
 export async function buscarChecklistsMes(ano, mes, limite = 20) {
@@ -132,12 +138,12 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
         ...doc.data()
     }));
 
-    console.log(`☁️ ${checklists.length} checklists carregados de ${ano}/${mes}`);
+    console.log(`☁️ ${checklists.length} checklists de ${ano}/${mesFormatado}`);
     return checklists;
 }
 
 // ================================
-// 🔧 COMPATIBILIDADE CHECKLIST.JS
+// 🔧 COMPATIBILIDADE ANTIGA
 // ================================
 export async function salvarNoFirebase(checklist) {
     console.log('🔥 salvandoNoFirebase → salvarChecklist');
@@ -146,8 +152,5 @@ export async function salvarNoFirebase(checklist) {
 
 export async function buscarChecklistsNuvem() {
     const agora = new Date();
-    const ano = agora.getFullYear();
-    const mes = agora.getMonth() + 1;
-    console.log(`☁️ Buscando checklists ${ano}/${mes}`);
-    return buscarChecklistsMes(ano, mes, 100);
+    return buscarChecklistsMes(agora.getFullYear(), agora.getMonth() + 1, 100);
 }

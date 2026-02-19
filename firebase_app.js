@@ -55,7 +55,6 @@ function caminhoChecklist(checklistId, dataCriacao) {
     const oficinaId = getOficinaId();
     const { ano, mes } = gerarCaminhoData(dataCriacao);
 
-    // ✅ CORRIGIDO: retorna só os dados necessários
     return {
         colecao: `oficinas/${oficinaId}/checklists/${ano}/${mes}`,
         docId: String(checklistId)
@@ -81,7 +80,6 @@ export async function salvarChecklist(checklist) {
             updated_at: serverTimestamp()
         };
 
-        // ✅ CORRIGIDO: usa 'colecao' ao invés de 'path'
         await setDoc(doc(db, colecao, docId), dados, { merge: true });
         console.log(`✅ Checklist salvo: ${colecao}/${docId}`);
 
@@ -103,10 +101,15 @@ async function atualizarIndiceVeiculo(checklist) {
 
         const oficinaId = getOficinaId();
         const placa = checklist.placa.replace(/[^A-Z0-9]/g, "").toUpperCase();
-
-        // ✅ CORRIGIDO DEFINITIVO: 4 segmentos
-        const refVeiculo = doc(db, `oficinas/${oficinaId}/veiculos/${placa}`);
-
+        
+        const caminhoCompleto = `oficinas/${oficinaId}/veiculos/${placa}`;
+        const segmentos = caminhoCompleto.split('/').length;
+        console.log(`🔍 DEBUG CAMINHO: "${caminhoCompleto}" = ${segmentos} segmentos`);
+        console.log(`🔍 OFICINA: "${oficinaId}" | PLACA: "${placa}"`);
+        
+        const refVeiculo = doc(db, "oficinas", oficinaId, "veiculos", placa);
+        console.log(`🔍 REF CRIADA:`, refVeiculo.path);
+        
         await setDoc(refVeiculo, {
             placa,
             ultima_visita: checklist.data_criacao,
@@ -114,9 +117,10 @@ async function atualizarIndiceVeiculo(checklist) {
             updated_at: serverTimestamp()
         }, { merge: true });
 
-        console.log(`🚗 Veículo OK: oficinas/${oficinaId}/veiculos/${placa}`);
+        console.log(`🚗 ✅ VEÍCULO SALVO: ${placa}`);
     } catch (error) {
-        console.warn(`⚠️ Skip veículo ${checklist.placa}:`, error.message);
+        console.error(`❌ VEÍCULO FALHOU:`, error);
+        console.error(`❌ PLACA: "${checklist.placa}" | TIPO:`, typeof checklist.placa);
     }
 }
 

@@ -130,3 +130,14 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
         ...doc.data()
     }));
 }
+
+// Compatibilidade com checklist.js antigo
+export async function salvarNoFirebase(checklist) {
+    return salvarChecklist(checklist);
+}
+
+export async function buscarChecklistsNuvem() {
+    const agora = new Date();
+    return buscarChecklistsMes(agora.getFullYear(), agora.getMonth() + 1);
+}
+

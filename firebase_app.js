@@ -1,4 +1,4 @@
-// firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.1 - BUGS CORRIGIDOS
+// firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.2 - BLINDAGEM PLACA
 
 const getFirebaseConfig = () => {
     if (window.FIREBASE_CONFIG) return window.FIREBASE_CONFIG;
@@ -63,6 +63,8 @@ function caminhoChecklist(checklistId, dataCriacao) {
 
 export async function salvarChecklist(checklist) {
     try {
+        console.log("📦 Checklist recebido:", checklist);
+
         const { db } = await initFirebase();
         const { doc, setDoc, serverTimestamp } = await import(
             "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
@@ -85,9 +87,12 @@ export async function salvarChecklist(checklist) {
 
         if (checklist.placa) {
             await atualizarIndiceVeiculo(checklist);
+        } else {
+            console.warn("⚠️ Checklist salvo sem placa.");
         }
+
     } catch (error) {
-        console.error('❌ Erro salvar checklist:', error);
+        console.error("❌ Erro salvar checklist:", error);
         throw error;
     }
 }
@@ -100,16 +105,24 @@ async function atualizarIndiceVeiculo(checklist) {
         );
 
         const oficinaId = getOficinaId();
-        const placa = checklist.placa.replace(/[^A-Z0-9]/g, "").toUpperCase();
-        
-        const caminhoCompleto = `oficinas/${oficinaId}/veiculos/${placa}`;
-        const segmentos = caminhoCompleto.split('/').length;
-        console.log(`🔍 DEBUG CAMINHO: "${caminhoCompleto}" = ${segmentos} segmentos`);
-        console.log(`🔍 OFICINA: "${oficinaId}" | PLACA: "${placa}"`);
-        
+
+        if (!checklist.placa || typeof checklist.placa !== "string") {
+            console.warn("⚠️ Placa inválida ou ausente. Índice não será criado.");
+            return;
+        }
+
+        const placa = checklist.placa
+            .replace(/[^A-Z0-9]/gi, "")
+            .toUpperCase()
+            .trim();
+
+        if (!placa) {
+            console.warn("⚠️ Placa vazia após normalização. Abortando índice.");
+            return;
+        }
+
         const refVeiculo = doc(db, "oficinas", oficinaId, "veiculos", placa);
-        console.log(`🔍 REF CRIADA:`, refVeiculo.path);
-        
+
         await setDoc(refVeiculo, {
             placa,
             ultima_visita: checklist.data_criacao,
@@ -118,9 +131,9 @@ async function atualizarIndiceVeiculo(checklist) {
         }, { merge: true });
 
         console.log(`🚗 ✅ VEÍCULO SALVO: ${placa}`);
+
     } catch (error) {
-        console.error(`❌ VEÍCULO FALHOU:`, error);
-        console.error(`❌ PLACA: "${checklist.placa}" | TIPO:`, typeof checklist.placa);
+        console.error("❌ VEÍCULO FALHOU:", error);
     }
 }
 
@@ -150,11 +163,15 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
 // 🔧 COMPATIBILIDADE CHECKLIST.JS
 // ================================
 export async function salvarNoFirebase(checklist) {
-    console.log('🔥 salvandoNoFirebase → salvarChecklist');
+    console.log("🔥 salvandoNoFirebase → salvarChecklist");
     return salvarChecklist(checklist);
 }
 
 export async function buscarChecklistsNuvem() {
     const agora = new Date();
-    return buscarChecklistsMes(agora.getFullYear(), agora.getMonth() + 1, 100);
+    return buscarChecklistsMes(
+        agora.getFullYear(),
+        agora.getMonth() + 1,
+        100
+    );
 }

@@ -80,6 +80,7 @@ export async function salvarChecklist(checklist) {
     };
 
     await setDoc(doc(db, path, docId), dados, { merge: true });
+    console.log(`✅ Checklist salvo: oficinas/${getOficinaId()}/checklists/.../${docId}`);
 
     if (checklist.placa) {
         await atualizarIndiceVeiculo(checklist);
@@ -105,6 +106,7 @@ async function atualizarIndiceVeiculo(checklist) {
         },
         { merge: true }
     );
+    console.log(`🚗 Índice veículo atualizado: ${placa}`);
 }
 
 export async function buscarChecklistsMes(ano, mes, limite = 20) {
@@ -125,19 +127,27 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
 
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    const checklists = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
     }));
+
+    console.log(`☁️ ${checklists.length} checklists carregados de ${ano}/${mes}`);
+    return checklists;
 }
 
-// Compatibilidade com checklist.js antigo
+// ================================
+// 🔧 COMPATIBILIDADE CHECKLIST.JS
+// ================================
 export async function salvarNoFirebase(checklist) {
+    console.log('🔥 salvandoNoFirebase → salvarChecklist');
     return salvarChecklist(checklist);
 }
 
 export async function buscarChecklistsNuvem() {
     const agora = new Date();
-    return buscarChecklistsMes(agora.getFullYear(), agora.getMonth() + 1);
+    const ano = agora.getFullYear();
+    const mes = agora.getMonth() + 1;
+    console.log(`☁️ Buscando checklists ${ano}/${mes}`);
+    return buscarChecklistsMes(ano, mes, 100);
 }
-

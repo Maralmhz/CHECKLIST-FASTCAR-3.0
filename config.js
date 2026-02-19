@@ -24,13 +24,3 @@ window.FIREBASE_CONFIG = {
     messagingSenderId: "597523417628",
     appId: "1:597523417628:web:c928794dec224c0d29edd9"
 };
-
-// ============================================
-// CONFIGURAÇÃO GIST (LEGADO - DESATIVADO)
-// ============================================
-// Token revogado - não usar mais
-window.CLOUD_CONFIG = {
-    TOKEN: '',  // Token revogado por segurança
-    GIST_ID: '75e76a26d9b0c36f602ec356f525680a',
-    FILENAME: 'backup_fastcar.json'
-};

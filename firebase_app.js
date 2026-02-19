@@ -1,88 +1,132 @@
-// firebase_app.js - LEGACY FUNCIONA 100% + MULTI OFICINA
+// firebase_app.js - PADRÃO SaaS MULTI OFICINA
 
-var firebaseConfig = {
-  apiKey: "AIzaSyCpCfotfXYNpQu5o0fFbBvwOnQgU9PuYqU",
-  authDomain: "checklist-oficina-72c9e.firebaseapp.com",
-  projectId: "checklist-oficina-72c9e",
-  storageBucket: "checklist-oficina-72c9e.firebasestorage.app",
-  messagingSenderId: "305423384809",
-  appId: "1:305423384809:web:b152970a419848a0147078"
+const getFirebaseConfig = () => {
+    if (window.FIREBASE_CONFIG) return window.FIREBASE_CONFIG;
+
+    return {
+        apiKey: window.FIREBASE_API_KEY,
+        authDomain: "checklist-oficina-72c9e.firebaseapp.com",
+        projectId: "checklist-oficina-72c9e",
+        storageBucket: "checklist-oficina-72c9e.appspot.com",
+        messagingSenderId: window.FIREBASE_SENDER_ID,
+        appId: window.FIREBASE_APP_ID
+    };
 };
 
-// ==========================================
-// CARREGAMENTO CDN FIREBASE 8
-// ==========================================
+let firebaseApp = null;
+let firestoreDB = null;
 
-const scripts = [
-  "https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js",
-  "https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js",
-  "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"
-];
+async function initFirebase() {
+    if (firebaseApp) return { app: firebaseApp, db: firestoreDB };
 
-let loaded = 0;
+    const { initializeApp } = await import(
+        "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"
+    );
+    const { getFirestore } = await import(
+        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+    );
 
-scripts.forEach(src => {
-  const script = document.createElement("script");
-  script.src = src;
-  script.onload = () => {
-    loaded++;
-    if (loaded === scripts.length) initFirebase();
-  };
-  document.head.appendChild(script);
-});
+    const config = getFirebaseConfig();
 
-// ==========================================
-// INICIALIZAÇÃO
-// ==========================================
+    if (!window.OFICINA_CONFIG?.oficina_id) {
+        throw new Error("OFICINA_CONFIG.oficina_id não definido");
+    }
 
-function initFirebase() {
-  firebase.initializeApp(firebaseConfig);
+    firebaseApp = initializeApp(config);
+    firestoreDB = getFirestore(firebaseApp);
 
-  window.db = firebase.firestore();
-  window.auth = firebase.auth();
+    console.log("🔥 Firebase inicializado:", window.OFICINA_CONFIG.oficina_id);
 
-  window.auth.signInAnonymously().catch(console.error);
-
-  console.log("✅ Firebase LEGACY pronto!");
+    return { app: firebaseApp, db: firestoreDB };
 }
 
-// ==========================================
-// FUNÇÕES MULTI OFICINA
-// ==========================================
-
-async function salvarNoFirebase(checklist) {
-  if (!window.db) throw new Error("Firebase não inicializado");
-
-  const oficinaId = window.OFICINA_CONFIG?.id;
-  if (!oficinaId) throw new Error("OFICINA_CONFIG.id não definido");
-
-  await window.db
-    .collection("oficinas")
-    .doc(oficinaId)
-    .collection("checklists")
-    .doc(String(checklist.id))
-    .set(checklist);
-
-  console.log("✅ Checklist salvo na oficina:", oficinaId);
+function getOficinaId() {
+    return window.OFICINA_CONFIG.oficina_id;
 }
 
-async function buscarChecklistsNuvem() {
-  if (!window.db) throw new Error("Firebase não inicializado");
-
-  const oficinaId = window.OFICINA_CONFIG?.id;
-  if (!oficinaId) throw new Error("OFICINA_CONFIG.id não definido");
-
-  const snapshot = await window.db
-    .collection("oficinas")
-    .doc(oficinaId)
-    .collection("checklists")
-    .get();
-
-  return snapshot.docs.map(doc => doc.data());
+function gerarCaminhoData(dataISO) {
+    const data = new Date(dataISO);
+    const ano = String(data.getFullYear());
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    return { ano, mes };
 }
 
-// ==========================================
-// EXPORT PARA IMPORT DINÂMICO
-// ==========================================
+function caminhoChecklist(checklistId, dataCriacao) {
+    const oficinaId = getOficinaId();
+    const { ano, mes } = gerarCaminhoData(dataCriacao);
 
-export { salvarNoFirebase, buscarChecklistsNuvem };
+    return {
+        path: `oficinas/${oficinaId}/checklists/${ano}/${mes}`,
+        docId: String(checklistId)
+    };
+}
+
+export async function salvarChecklist(checklist) {
+    const { db } = await initFirebase();
+    const { doc, setDoc, serverTimestamp } = await import(
+        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+    );
+
+    const { path, docId } = caminhoChecklist(
+        checklist.id,
+        checklist.data_criacao
+    );
+
+    const dados = {
+        ...checklist,
+        oficina_id: getOficinaId(),
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+    };
+
+    await setDoc(doc(db, path, docId), dados, { merge: true });
+
+    if (checklist.placa) {
+        await atualizarIndiceVeiculo(checklist);
+    }
+}
+
+async function atualizarIndiceVeiculo(checklist) {
+    const { db } = await initFirebase();
+    const { doc, setDoc, arrayUnion, serverTimestamp } = await import(
+        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+    );
+
+    const oficinaId = getOficinaId();
+    const placa = checklist.placa.replace(/[^A-Z0-9]/g, "").toUpperCase();
+
+    await setDoc(
+        doc(db, `oficinas/${oficinaId}/veiculos`, placa),
+        {
+            placa,
+            ultima_visita: checklist.data_criacao,
+            historico_ids: arrayUnion(checklist.id),
+            updated_at: serverTimestamp()
+        },
+        { merge: true }
+    );
+}
+
+export async function buscarChecklistsMes(ano, mes, limite = 20) {
+    const { db } = await initFirebase();
+    const { collection, getDocs, query, orderBy, limit } = await import(
+        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+    );
+
+    const oficinaId = getOficinaId();
+    const mesFormatado = String(mes).padStart(2, "0");
+
+    const ref = collection(
+        db,
+        `oficinas/${oficinaId}/checklists/${ano}/${mesFormatado}`
+    );
+
+    const q = query(ref, orderBy("data_criacao", "desc"), limit(limite));
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+}

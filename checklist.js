@@ -47,7 +47,7 @@ async function sincronizarChecklists() {
         }
     } catch (e) {
         console.error("Erro sync:", e);
-        alert("❌ Erro ao sincronizar.\n\nDetalhe: " + (e.message || e) + "\n\nVerifique:\n1. Conexão com a Internet\n2. Token no arquivo config.js");
+        alert("❌ Erro ao sincronizar.\n\nDetalhe: " + (e.message || e) + "\n\nVerifique:\n1. Conexão com a Internet\n2. Configuração FIREBASE_CONFIG no config.js\n3. Permissões/Rules do Firestore");
     } finally {
         btn.textContent = txtOriginal;
         btn.disabled = false;

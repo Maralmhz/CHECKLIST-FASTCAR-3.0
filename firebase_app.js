@@ -1,16 +1,11 @@
 // firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.2 - BLINDAGEM PLACA
 
 const getFirebaseConfig = () => {
-    if (window.FIREBASE_CONFIG) return window.FIREBASE_CONFIG;
+    if (!window.FIREBASE_CONFIG) {
+        throw new Error("FIREBASE_CONFIG não definido em config.js");
+    }
 
-    return {
-        apiKey: window.FIREBASE_API_KEY,
-        authDomain: "checklist-oficina-72c9e.firebaseapp.com",
-        projectId: "checklist-oficina-72c9e",
-        storageBucket: "checklist-oficina-72c9e.appspot.com",
-        messagingSenderId: window.FIREBASE_SENDER_ID,
-        appId: window.FIREBASE_APP_ID
-    };
+    return window.FIREBASE_CONFIG;
 };
 
 let firebaseApp = null;

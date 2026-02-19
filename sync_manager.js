@@ -3,6 +3,29 @@
 
 (function() {
     'use strict';
+
+
+    async function carregarModuloFirebase() {
+        try {
+            return await import('./firebase_app.js');
+        } catch (error) {
+            console.error('❌ Falha ao importar firebase_app.js:', error);
+            throw new Error('Firebase indisponível. Verifique o carregamento de firebase_app.js e config.js');
+        }
+    }
+
+    async function buscarChecklistsMes(ano, mes, limite = 100) {
+        const moduloFirebase = await carregarModuloFirebase();
+        if (!moduloFirebase?.buscarChecklistsMes) {
+            throw new Error('Função buscarChecklistsMes não disponível no módulo Firebase');
+        }
+        return moduloFirebase.buscarChecklistsMes(ano, mes, limite);
+    }
+
+    async function buscarChecklistsMesAtual(limite = 100) {
+        const agora = new Date();
+        return buscarChecklistsMes(agora.getFullYear(), agora.getMonth() + 1, limite);
+    }
     
     class SyncManager {
         constructor() {
@@ -25,13 +48,7 @@
                     throw new Error('CacheManager não inicializado. Carregue cache_manager.js primeiro!');
                 }
                 
-                // Verificar se firebase_app.js está carregado
-              if (!window.db) {
-  console.warn('🔄 Firebase carregando... modo híbrido');
-  window.db = window.db || { collection: () => ({ add: async()=>{}, get: async()=>[] }) };
-}
-
-
+                // Firebase é carregado sob demanda por import dinâmico em buscarChecklistsMes().
                 
                 const ultimaSync = await cache.getUltimaSincronizacao();
                 

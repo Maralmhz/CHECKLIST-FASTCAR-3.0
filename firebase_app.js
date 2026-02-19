@@ -1,17 +1,21 @@
 // firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.2 - BLINDAGEM PLACA
 
 const getFirebaseConfig = () => {
-    if (window.FIREBASE_CONFIG) return window.FIREBASE_CONFIG;
+    if (!window.FIREBASE_CONFIG) {
+        throw new Error("FIREBASE_CONFIG não definido em config.js");
+    }
 
-    return {
-        apiKey: window.FIREBASE_API_KEY,
-        authDomain: "checklist-oficina-72c9e.firebaseapp.com",
-        projectId: "checklist-oficina-72c9e",
-        storageBucket: "checklist-oficina-72c9e.appspot.com",
-        messagingSenderId: window.FIREBASE_SENDER_ID,
-        appId: window.FIREBASE_APP_ID
-    };
+    return window.FIREBASE_CONFIG;
 };
+
+function validarFirebaseConfig(config) {
+    const camposObrigatorios = ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"];
+    const faltando = camposObrigatorios.filter((campo) => !config?.[campo]);
+
+    if (faltando.length > 0) {
+        throw new Error(`FIREBASE_CONFIG incompleto. Campos ausentes: ${faltando.join(", ")}`);
+    }
+}
 
 let firebaseApp = null;
 let firestoreDB = null;
@@ -27,6 +31,7 @@ async function initFirebase() {
     );
 
     const config = getFirebaseConfig();
+    validarFirebaseConfig(config);
 
     if (!window.OFICINA_CONFIG?.oficina_id) {
         throw new Error("OFICINA_CONFIG.oficina_id não definido");
@@ -78,6 +83,8 @@ export async function salvarChecklist(checklist) {
         const dados = {
             ...checklist,
             oficina_id: getOficinaId(),
+            criado_em: checklist.data_criacao || new Date().toISOString(),
+            atualizado_em: new Date().toISOString(),
             created_at: serverTimestamp(),
             updated_at: serverTimestamp()
         };
@@ -127,6 +134,7 @@ async function atualizarIndiceVeiculo(checklist) {
             placa,
             ultima_visita: checklist.data_criacao,
             historico_ids: arrayUnion(checklist.id),
+            atualizado_em: new Date().toISOString(),
             updated_at: serverTimestamp()
         }, { merge: true });
 
@@ -169,9 +177,22 @@ export async function salvarNoFirebase(checklist) {
 
 export async function buscarChecklistsNuvem() {
     const agora = new Date();
-    return buscarChecklistsMes(
-        agora.getFullYear(),
-        agora.getMonth() + 1,
-        100
+    const periodos = [
+        { ano: agora.getFullYear(), mes: agora.getMonth() + 1 },
+        { ano: new Date(agora.getFullYear(), agora.getMonth() - 1, 1).getFullYear(), mes: new Date(agora.getFullYear(), agora.getMonth() - 1, 1).getMonth() + 1 }
+    ];
+
+    const listas = await Promise.all(
+        periodos.map(({ ano, mes }) => buscarChecklistsMes(ano, mes, 100))
+    );
+
+    const mapa = new Map();
+    listas.flat().forEach((item) => {
+        if (!item?.id) return;
+        mapa.set(String(item.id), item);
+    });
+
+    return Array.from(mapa.values()).sort((a, b) =>
+        new Date(b.data_criacao || 0) - new Date(a.data_criacao || 0)
     );
 }

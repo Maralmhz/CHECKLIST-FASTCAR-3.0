@@ -28,11 +28,11 @@ async function sincronizarChecklists() {
             
             if (dadosNuvem.length > 0) {
                 let local = JSON.parse(localStorage.getItem('checklists') || '[]');
-                const idsLocais = new Set(local.map(c => c.id));
+                const idsLocais = new Set(local.map(c => String(c.id)));
                 
                 let novos = 0;
                 dadosNuvem.forEach(item => {
-                    if (!idsLocais.has(item.id)) {
+                    if (!idsLocais.has(String(item.id))) {
                         local.push(item);
                         novos++;
                     }
@@ -42,12 +42,12 @@ async function sincronizarChecklists() {
                 carregarHistorico();
                 alert(`✅ Sincronização concluída! ${novos} novos checklists baixados.`);
             } else {
-                alert("📭 Nenhum checklist encontrado na nuvem para esta oficina (ou erro de configuração).");
+                alert("📭 Nenhum checklist encontrado na nuvem para esta oficina nos períodos consultados (mês atual e anterior).");
             }
         }
     } catch (e) {
         console.error("Erro sync:", e);
-        alert("❌ Erro ao sincronizar.\n\nDetalhe: " + (e.message || e) + "\n\nVerifique:\n1. Conexão com a Internet\n2. Token no arquivo config.js");
+        alert("❌ Erro ao sincronizar.\n\nDetalhe: " + (e.message || e) + "\n\nVerifique:\n1. Conexão com a Internet\n2. Configuração FIREBASE_CONFIG no config.js\n3. Permissões/Rules do Firestore");
     } finally {
         btn.textContent = txtOriginal;
         btn.disabled = false;

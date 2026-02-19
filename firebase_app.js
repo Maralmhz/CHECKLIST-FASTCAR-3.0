@@ -1,4 +1,4 @@
-// firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.0 - CORRIGIDO
+// firebase_app.js - PADRÃO SaaS MULTI OFICINA ✅ V2.1 - BUGS CORRIGIDOS
 
 const getFirebaseConfig = () => {
     if (window.FIREBASE_CONFIG) return window.FIREBASE_CONFIG;
@@ -55,35 +55,42 @@ function caminhoChecklist(checklistId, dataCriacao) {
     const oficinaId = getOficinaId();
     const { ano, mes } = gerarCaminhoData(dataCriacao);
 
+    // ✅ CORRIGIDO: retorna só os dados necessários
     return {
-        path: `oficinas/${oficinaId}/checklists/${ano}/${mes}`,
+        colecao: `oficinas/${oficinaId}/checklists/${ano}/${mes}`,
         docId: String(checklistId)
     };
 }
 
 export async function salvarChecklist(checklist) {
-    const { db } = await initFirebase();
-    const { doc, setDoc, serverTimestamp } = await import(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
-    );
+    try {
+        const { db } = await initFirebase();
+        const { doc, setDoc, serverTimestamp } = await import(
+            "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+        );
 
-    const { path, docId } = caminhoChecklist(
-        checklist.id,
-        checklist.data_criacao
-    );
+        const { colecao, docId } = caminhoChecklist(
+            checklist.id,
+            checklist.data_criacao
+        );
 
-    const dados = {
-        ...checklist,
-        oficina_id: getOficinaId(),
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp()
-    };
+        const dados = {
+            ...checklist,
+            oficina_id: getOficinaId(),
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp()
+        };
 
-    await setDoc(doc(db, path, docId), dados, { merge: true });
-    console.log(`✅ Checklist salvo: oficinas/${getOficinaId()}/checklists/${path}/${docId}`);
+        // ✅ CORRIGIDO: usa 'colecao' ao invés de 'path'
+        await setDoc(doc(db, colecao, docId), dados, { merge: true });
+        console.log(`✅ Checklist salvo: ${colecao}/${docId}`);
 
-    if (checklist.placa) {
-        await atualizarIndiceVeiculo(checklist);
+        if (checklist.placa) {
+            await atualizarIndiceVeiculo(checklist);
+        }
+    } catch (error) {
+        console.error('❌ Erro salvar checklist:', error);
+        throw error;
     }
 }
 
@@ -97,21 +104,19 @@ async function atualizarIndiceVeiculo(checklist) {
         const oficinaId = getOficinaId();
         const placa = checklist.placa.replace(/[^A-Z0-9]/g, "").toUpperCase();
 
-        // ✅ CORRIGIDO: 4 segmentos (par)
-        await setDoc(
-            doc(db, `oficinas/${oficinaId}/veiculos/${placa}`),
-            {
-                placa,
-                ultima_visita: checklist.data_criacao,
-                historico_ids: arrayUnion(checklist.id),
-                updated_at: serverTimestamp()
-            },
-            { merge: true }
-        );
-        console.log(`🚗 Veículo indexado: oficinas/${oficinaId}/veiculos/${placa}`);
+        // ✅ CORRIGIDO DEFINITIVO: 4 segmentos
+        const refVeiculo = doc(db, `oficinas/${oficinaId}/veiculos/${placa}`);
+
+        await setDoc(refVeiculo, {
+            placa,
+            ultima_visita: checklist.data_criacao,
+            historico_ids: arrayUnion(checklist.id),
+            updated_at: serverTimestamp()
+        }, { merge: true });
+
+        console.log(`🚗 Veículo OK: oficinas/${oficinaId}/veiculos/${placa}`);
     } catch (error) {
-        console.warn(`⚠️ Erro veículo ${checklist.placa}:`, error.message);
-        // Não quebra o checklist principal
+        console.warn(`⚠️ Skip veículo ${checklist.placa}:`, error.message);
     }
 }
 
@@ -124,26 +129,21 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
     const oficinaId = getOficinaId();
     const mesFormatado = String(mes).padStart(2, "0");
 
-    const ref = collection(
-        db,
-        `oficinas/${oficinaId}/checklists/${ano}/${mesFormatado}`
-    );
-
+    const ref = collection(db, `oficinas/${oficinaId}/checklists/${ano}/${mesFormatado}`);
     const q = query(ref, orderBy("data_criacao", "desc"), limit(limite));
 
     const snapshot = await getDocs(q);
-
     const checklists = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
     }));
 
-    console.log(`☁️ ${checklists.length} checklists de ${ano}/${mesFormatado}`);
+    console.log(`☁️ ${checklists.length} checklists ${ano}/${mesFormatado}`);
     return checklists;
 }
 
 // ================================
-// 🔧 COMPATIBILIDADE ANTIGA
+// 🔧 COMPATIBILIDADE CHECKLIST.JS
 // ================================
 export async function salvarNoFirebase(checklist) {
     console.log('🔥 salvandoNoFirebase → salvarChecklist');

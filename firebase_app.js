@@ -168,6 +168,18 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
 }
 
 // ================================
+// ✅ NOVA FUNÇÃO - MÊS ATUAL
+// ================================
+export async function buscarChecklistsMesAtual() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = agora.getMonth() + 1;
+    
+    console.log(`📅 Buscando checklists de ${mes}/${ano}`);
+    return buscarChecklistsMes(ano, mes, 100);
+}
+
+// ================================
 // 🔧 COMPATIBILIDADE CHECKLIST.JS
 // ================================
 export async function salvarNoFirebase(checklist) {
